@@ -14,4 +14,6 @@ public class ProfileResponse {
     private Double longitude;
     private String skills;
     private Double workRadius;
+    private Double averageRating;
+    private Long ratingCount;
 }

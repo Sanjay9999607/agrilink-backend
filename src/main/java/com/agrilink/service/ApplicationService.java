@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.agrilink.dto.ReviewResponse;
+
 @Service
 @RequiredArgsConstructor
 public class ApplicationService {
@@ -17,6 +19,7 @@ public class ApplicationService {
     private final JobRepository jobRepo;
     private final UserRepository userRepo;
     private final LabourerProfileRepository labRepo;
+    private final ReviewRepository reviewRepo;
 
     // ── Labourer applies for a job ────────────────────────────────
     public Map<String, String> apply(Long jobId, String email) {
@@ -123,6 +126,20 @@ public class ApplicationService {
             .map(LabourerProfile::getSkills)
             .orElse("—");
 
+        List<ReviewResponse> labourerReviews = reviewRepo.findByReviewee(lab).stream()
+            .map(r -> ReviewResponse.builder()
+                .id(r.getId())
+                .jobId(r.getJob().getId())
+                .reviewerId(r.getReviewer().getId())
+                .reviewerName(r.getReviewer().getName())
+                .revieweeId(r.getReviewee().getId())
+                .revieweeName(r.getReviewee().getName())
+                .rating(r.getRating())
+                .comment(r.getComment())
+                .createdAt(r.getCreatedAt())
+                .build())
+            .collect(Collectors.toList());
+
         return ApplicationResponse.builder()
             .id(app.getId())
             .jobId(app.getJob().getId())
@@ -135,6 +152,10 @@ public class ApplicationService {
             .labourerEmail(accepted ? lab.getEmail() : null)
             .labourerSkills(skills)                     // always visible
             .labourerLocation(lab.getLocationName())
+            .labourerAverageRating(lab.getAverageRating())
+            .labourerRatingCount(lab.getRatingCount())
+            .labourerReviews(labourerReviews)
+            .landownerId(app.getJob().getLandowner().getId())
             .landownerName(app.getJob().getLandowner().getName())
             .landownerPhone(app.getJob().getLandowner().getPhone())
             .landownerEmail(app.getJob().getLandowner().getEmail())
@@ -165,6 +186,7 @@ public class ApplicationService {
             .labourerSkills(skills)
             .labourerLocation(lab.getLocationName())
             // Landowner contact revealed only after accepted
+            .landownerId(app.getJob().getLandowner().getId())
             .landownerName(accepted ? app.getJob().getLandowner().getName() : null)
             .landownerPhone(accepted ? app.getJob().getLandowner().getPhone() : null)
             .landownerEmail(accepted ? app.getJob().getLandowner().getEmail() : null)

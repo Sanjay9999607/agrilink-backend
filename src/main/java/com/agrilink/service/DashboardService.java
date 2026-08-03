@@ -13,14 +13,16 @@ public class DashboardService {
     private final UserRepository userRepo;
     private final JobRepository jobRepo;
     private final ApplicationRepository appRepo;
+    private final JobService jobService;
 
     public DashboardResponse getDashboard(String email) {
 
         User user = userRepo.findByEmail(email).orElseThrow();
 
         if (user.getRole() == User.Role.LABOURER) {
-            long totalJobs =
-                jobRepo.findByStatus(Job.JobStatus.OPEN).size();
+            long totalJobs = user.getLatitude() != null
+                ? jobService.getNearbyJobs(email).size()
+                : 0L;
             long totalApps = appRepo.countByLabourer(user);
             long accepted = appRepo.countByLabourerAndStatus(
                 user, Application.AppStatus.ACCEPTED);

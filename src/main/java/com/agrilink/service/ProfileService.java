@@ -80,6 +80,8 @@ public class ProfileService {
             .longitude(user.getLongitude())
             .skills(skills)
             .workRadius(user.getWorkRadius())
+            .averageRating(user.getAverageRating())
+            .ratingCount(user.getRatingCount())
             .build();
     }
 }

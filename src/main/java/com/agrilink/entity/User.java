@@ -37,6 +37,9 @@ public class User {
     // LABOURER ONLY — how far they are willing to travel in km
     private Double workRadius;
 
+    private Double averageRating;
+    private Long ratingCount;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

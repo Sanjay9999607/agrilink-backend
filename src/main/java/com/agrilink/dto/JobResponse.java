@@ -17,6 +17,8 @@ public class JobResponse {
     private Double maxDistance;
     private String status;
     private String landownerName;
+    private Double landownerAverageRating;
+    private Long landownerRatingCount;
     private Double distanceKm;
     private LocalDateTime createdAt;
 }

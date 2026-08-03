@@ -15,6 +15,7 @@ public class JobService {
 
     private final JobRepository jobRepo;
     private final UserRepository userRepo;
+    private final ApplicationRepository appRepo;
     private final HaversineUtil haversine;
 
     public JobResponse createJob(
@@ -54,6 +55,7 @@ public class JobService {
     // 1. distance <= job.maxDistance (landowner rule)
     // 2. distance <= labourer.workRadius (labourer rule)
     // Both must pass. Sorted nearest first.
+    // Also excludes jobs that the labourer has already applied for.
     public List<JobResponse> getNearbyJobs(String email) {
 
         User labourer =
@@ -65,8 +67,14 @@ public class JobService {
                 + "Please update your profile.");
         }
 
+        Set<Long> appliedJobIds = appRepo.findByLabourer(labourer).stream()
+            .map(app -> app.getJob().getId())
+            .collect(Collectors.toSet());
+
         return jobRepo.findByStatus(Job.JobStatus.OPEN)
             .stream()
+            .filter(job -> !appliedJobIds.contains(job.getId()))
+            .filter(job -> job.getWorkersAcceptedCount() < job.getWorkersRequired())
             .map(job -> {
                 double dist = haversine.distance(
                     labourer.getLatitude(),
@@ -119,6 +127,8 @@ public class JobService {
             .maxDistance(job.getMaxDistance())
             .status(job.getStatus().name())
             .landownerName(job.getLandowner().getName())
+            .landownerAverageRating(job.getLandowner().getAverageRating())
+            .landownerRatingCount(job.getLandowner().getRatingCount())
             .distanceKm(distance)
             .createdAt(job.getCreatedAt())
             .build();

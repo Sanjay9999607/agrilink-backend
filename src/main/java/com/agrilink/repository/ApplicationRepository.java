@@ -20,6 +20,8 @@ public interface ApplicationRepository
 
     Optional<Application> findByJobAndLabourer(Job job, User labourer);
 
+    Optional<Application> findByJobAndLabourerAndStatus(Job job, User labourer, Application.AppStatus status);
+
     // ── For DashboardService (LABOURER) ──────────────────────────
     long countByLabourer(User labourer);
 
